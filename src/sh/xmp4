@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+if [[ $# -eq 3 && $1 == ?* && -d $2 ]]
+then
+	for v in "$2"/*.$1
+	do
+		video="${v##*/}"
+		video="${video%.*}"
+		video="${video//.../}"
+		video="${video//. /_}"
+		video="${video// - /_}"
+		video="${video// /_}"
+		video="$(echo $video | tr "[:upper:]" "[:lower:]")"
+
+		if [[ !d "$3" ]]
+		then
+			mkdir -p "$3"
+		fi
+
+		ffmpeg -i "${v}" -c:v libx264 -crf 23 -c:a libfaac -q:a 100 "${3}/${video}.mp4"
+	done
+else
+	echo "usage: ${0} <targetExtension> <inputDirectory> <outputDirectory>"
+	exit 1
+fi
