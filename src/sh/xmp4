@@ -6,20 +6,19 @@ then
 	do
 		video="${v##*/}"
 		video="${video%.*}"
-		video="${video//.../}"
-		video="${video//. /_}"
-		video="${video// - /_}"
-		video="${video// /_}"
-		video="$(echo $video | tr "[:upper:]" "[:lower:]")"
 
-		if [[ !d "$3" ]]
+		if [[ ! -d "$3" ]]
 		then
 			mkdir -p "$3"
 		fi
 
-		ffmpeg -i "${v}" -c:v libx264 -crf 23 -c:a libfaac -q:a 100 "${3}/${video}.mp4"
+		echo
+		echo -e "\033[33mTranscoding ${video}.${1}...\033[0m"
+		ffmpeg -loglevel quiet -stats -i "${v}" -c:v libx264 -crf 23 -c:a libfaac -q:a 100 "${3}/${video}.mp4"
 	done
+	echo
+	echo -e '\033[32mTranscode Complete!\033[0m'
 else
-	echo "usage: ${0} <targetExtension> <inputDirectory> <outputDirectory>"
+	echo -n "\033[31musage: ${0} <targetExtension> <inputDirectory> <outputDirectory>\033[0m"
 	exit 1
 fi
