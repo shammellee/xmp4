@@ -19,6 +19,6 @@ then
 	echo
 	echo -e '\033[32mTranscode Complete!\033[0m'
 else
-	echo -n "\033[31musage: ${0} <targetExtension> <inputDirectory> <outputDirectory>\033[0m"
+	echo -e "\033[35musage:\033[0m ${0} <targetExtension> <inputDirectory> <outputDirectory>"
 	exit 1
 fi
