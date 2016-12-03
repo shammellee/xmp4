@@ -2,7 +2,7 @@
 high-level ffmpeg layer for transcoding video to h264/aac format
 
 ## Dependencies
-* [ffmpeg](https://ffmpeg.org "ffmpeg") (with libfaac support)
+* [ffmpeg](https://ffmpeg.org "ffmpeg")
 
 ## Synopsis
 	xmp4 <targetExtension> <inputDirectory> <outputDirectory>
