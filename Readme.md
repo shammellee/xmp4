@@ -1,5 +1,5 @@
 # xmp4
-high-level ffmpeg layer for transcoding video to h264/aac format
+ffmpeg wrapper for transcoding video to h264/aac format
 
 ## Dependencies
 * [ffmpeg](https://ffmpeg.org "ffmpeg")
