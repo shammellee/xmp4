@@ -2,23 +2,26 @@
 
 if [[ $# -eq 3 && $1 == ?* && -d $2 ]]
 then
-	for v in "$2"/*.$1
-	do
-		video="${v##*/}"
-		video="${video%.*}"
+  _extension=$1
+  _src_dir=$2
+  _dest_dir=$3
 
-		if [[ ! -d "$3" ]]
-		then
-			mkdir -p "$3"
-		fi
+  for video in "$_src_dir"/*.$_extension
+  do
+    video_name="${video##*/}"
+    video_stem="${video_name%.*}"
 
-		echo
-		echo -e "\033[33mTranscoding ${video}.${1}...\033[0m"
-		ffmpeg -loglevel quiet -stats -i "${v}" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${3}/${video}.mp4"
-	done
-	echo
-	echo -e '\033[32mTranscode Complete!\033[0m'
+    if [[ ! -d "$_dest_dir" ]]
+    then
+      mkdir -p "$_dest_dir"
+    fi
+
+    echo -e "\n\e[33mTranscoding\e[0 ${video_name}..."
+    ffmpeg -loglevel panic -stats -nostdin -i "${video}" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${_dest_dir}/${video_stem}.mp4"
+  done
+  echo
+  echo -e '\e[32mTranscode Complete!\e[0m'
 else
-	echo -e "\033[35musage:\033[0m ${0##*/} <targetExtension> <inputDirectory> <outputDirectory>"
-	exit 1
+  echo -e "\e[35mUsage:\e[0m ${0##*/} <targetExtension> <inputDirectory> <outputDirectory>"
+  exit 1
 fi
