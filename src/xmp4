@@ -11,7 +11,7 @@ then
     video_name="${video##*/}"
     video_stem="${video_name%.*}"
 
-    if [[ ! -d "$_dest_dir" ]]
+    if [[ ! -e "$_dest_dir" ]]
     then
       mkdir -p "$_dest_dir"
     fi
