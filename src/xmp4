@@ -16,7 +16,7 @@ then
       mkdir -p "$_dest_dir"
     fi
 
-    echo -e "\n\e[33mTranscoding\e[0 ${video_name}..."
+    echo -e "\n\e[33mTranscoding\e[0m ${video_name}..."
     ffmpeg -loglevel panic -stats -nostdin -i "${video}" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${_dest_dir}/${video_stem}.mp4"
   done
   echo
