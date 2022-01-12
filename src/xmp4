@@ -1,27 +1,39 @@
 #!/usr/bin/env bash
 
-if [[ $# -eq 3 && $1 == ?* && -d $2 ]]
+if [[ $# -ge 2 && $1 == ?* ]]
 then
-  _extension=$1
-  _src_dir=$2
-  _dest_dir=$3
+  # First command line argument is the destination directory
+  _dest_dir=$1
 
-  for video in "$_src_dir"/*.$_extension
+  # Skip first command line argument
+  shift
+
+  # Remaining command line arguments are input video files
+  _videos=( "$@" )
+
+  for _video in "${_videos[@]}"
   do
-    video_name="${video##*/}"
-    video_stem="${video_name%.*}"
+    _video_name="${_video##*/}"      # Extract file name from path
+    _video_stem="${_video_name%.*}"  # Remove extension from file name
 
-    if [[ ! -e "$_dest_dir" ]]
+    # If the destination exists and is not a directory
+    if [[ -e "$_dest_dir" && ! -d "$_dest_dir" ]]
     then
+      echo -e "\e[35mError:\e[0m ${_dest_dir} is not a directory"
+      exit 1
+    else
       mkdir -p "$_dest_dir"
     fi
 
-    echo -e "\n\e[33mTranscoding\e[0m ${video_name}..."
-    ffmpeg -loglevel panic -stats -nostdin -i "${video}" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${_dest_dir}/${video_stem}.mp4"
+    echo -e "\n\e[33mTranscoding\e[0m ${_video_name}..."
+
+    # Convert input to mp4
+    ffmpeg -loglevel panic -stats -nostdin -i "${_video}" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${_dest_dir}/${_video_stem}.mp4"
   done
   echo
   echo -e '\e[32mTranscode Complete!\e[0m'
 else
-  echo -e "\e[35mUsage:\e[0m ${0##*/} <targetExtension> <inputDirectory> <outputDirectory>"
+  echo -e "\e[35mUsage:\e[0m ${0##*/} <outputDirectory> <inputFile> [...]"
   exit 1
 fi
+
