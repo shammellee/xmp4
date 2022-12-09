@@ -2,11 +2,27 @@
 
 if [[ $# -ge 2 && $1 == ?* ]]
 then
-  # First command line argument is the destination directory
-  _dest_dir=$1
+  _target_codec='libx265'
 
-  # Skip first command line argument
+  if [[ "$1" =~ ^(h\.?)?(26[45])$ ]]
+  then
+    _target_codec="libx${BASH_REMATCH[2]}"
+
+    shift
+  fi
+
+  # Next command line argument is the destination directory
+  readonly DESTINATION_DIRECTORY=$1
+
+  # Advance to next command line argument
   shift
+
+  if [[ $# -eq 0 ]]
+  then
+    echo -e "\033[33mNo input files specified\033[0m"
+
+    exit 1
+  fi
 
   # Remaining command line arguments are input video files
   _videos=( "$@" )
@@ -16,24 +32,37 @@ then
     _video_name="${_video##*/}"      # Extract file name from path
     _video_stem="${_video_name%.*}"  # Remove extension from file name
 
-    # If the destination exists and is not a directory
-    if [[ -e "$_dest_dir" && ! -d "$_dest_dir" ]]
+    if [[ ! -f "$_video_name" ]]
     then
-      echo -e "\e[35mError:\e[0m ${_dest_dir} is not a directory"
+      echo -e "\033[31mNot a file, skipping:\033[0m ${_video_name}"
+
+      continue
+    fi
+
+    # If the destination exists and is not a directory
+    if [[ -e "$DESTINATION_DIRECTORY" && ! -d "$DESTINATION_DIRECTORY" ]]
+    then
+      echo -e "\e[35mError:\e[0m ${DESTINATION_DIRECTORY} is not a directory"
       exit 1
     else
-      mkdir -p "$_dest_dir"
+      mkdir -p "$DESTINATION_DIRECTORY"
     fi
 
     echo -e "\n\e[33mTranscoding\e[0m ${_video_name}..."
 
-    # Convert input to mp4
-    ffmpeg -loglevel panic -stats -nostdin -i "${_video}" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${_dest_dir}/${_video_stem}.mp4"
+    # Convert input file(s) to mp4
+    if [[ ${BASH_REMATCH[2]} == '265' ]]
+    then
+      ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac "${DESTINATION_DIRECTORY}/${_video_stem}.mp4"
+    elif [[ ${BASH_REMATCH[2]} == '264' ]]
+    then
+      ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${DESTINATION_DIRECTORY}/${_video_stem}.mp4"
+    fi
   done
-  echo
-  echo -e '\e[32mTranscode Complete!\e[0m'
+
+  echo -e '\n\033[32mTranscode Complete!\e[0m'
 else
-  echo -e "\e[35mUsage:\e[0m ${0##*/} <outputDirectory> <inputFile> [...]"
+  echo -e "\e[33mUsage:\e[0m ${0##*/} [<output_codec=265|264>] <output_directory> <input_file> [...]"
   exit 1
 fi
 
