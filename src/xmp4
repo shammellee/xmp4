@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ $# -ge 2 && $1 == ?* ]]
+if [[ $# -ge 2 ]]
 then
   _target_codec='libx265'
 
@@ -29,8 +29,8 @@ then
 
   for _video in "${_videos[@]}"
   do
-    _video_name="${_video##*/}"      # Extract file name from path
-    _video_stem="${_video_name%.*}"  # Remove extension from file name
+    _video_name="${_video##*/}"              # Extract file name from path
+    _video_name_out="${_video_name%.*}.mp4"  # Remove extension from file name
 
     if [[ ! -f "$_video_name" ]]
     then
@@ -48,16 +48,24 @@ then
       mkdir -p "$DESTINATION_DIRECTORY"
     fi
 
-    echo -e "\n\e[33mTranscoding\e[0m ${_video_name}..."
+    echo -en "\n\e[33mTranscoding\e[0m ${_video_name} "
 
     # Convert input file(s) to mp4
-    if [[ ${BASH_REMATCH[2]} == '265' ]]
-    then
-      ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac "${DESTINATION_DIRECTORY}/${_video_stem}.mp4"
-    elif [[ ${BASH_REMATCH[2]} == '264' ]]
-    then
-      ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${DESTINATION_DIRECTORY}/${_video_stem}.mp4"
-    fi
+    case $_target_codec in
+      'libx265')
+        echo "using h.265 encoder..."
+        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac "${DESTINATION_DIRECTORY}/${_video_name_out}"
+        ;;
+
+      'libx264')
+        echo "using h.264 encoder..."
+        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${DESTINATION_DIRECTORY}/${_video_name_out}"
+        ;;
+
+      *)
+        echo -e "\033[31mTranscoding cancelled. No encoder for\033[0m ${_video_name}"
+        ;;
+    esac
   done
 
   echo -e '\n\033[32mTranscode Complete!\e[0m'
