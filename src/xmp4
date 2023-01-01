@@ -54,7 +54,7 @@ then
     case $_target_codec in
       'libx265')
         echo "using h.265 encoder..."
-        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac "${DESTINATION_DIRECTORY}/${_video_name_out}"
+        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -tag:v hvc1 -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac "${DESTINATION_DIRECTORY}/${_video_name_out}"
         ;;
 
       'libx264')
