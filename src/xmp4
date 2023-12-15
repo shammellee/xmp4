@@ -32,7 +32,7 @@ then
     _video_name="${_video##*/}"              # Extract file name from path
     _video_name_out="${_video_name%.*}.mp4"  # Remove extension from file name
 
-    if [[ ! -f "$_video_name" ]]
+    if [[ ! -f "$_video" ]]
     then
       echo -e "\033[31mNot a file, skipping:\033[0m ${_video_name}"
 
@@ -54,12 +54,12 @@ then
     case $_target_codec in
       'libx265')
         echo "using h.265 encoder..."
-        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -tag:v hvc1 -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac "${DESTINATION_DIRECTORY}/${_video_name_out}"
+        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -map 0 -c copy -tag:v hvc1 -c:v libx265 -x265-params log-level=error -crf 28 -c:a aac -c:s mov_text "${DESTINATION_DIRECTORY}/${_video_name_out}"
         ;;
 
       'libx264')
         echo "using h.264 encoder..."
-        ffmpeg -loglevel panic -stats -nostdin -i "$_video" -c:v libx264 -crf 23 -c:a aac -q:a 100 "${DESTINATION_DIRECTORY}/${_video_name_out}"
+        ffmpeg -loglevel panic -stats -nostdin -i "$_video"  -map 0 -c copy -c:v libx264 -crf 23 -c:a aac -q:a 100 "${DESTINATION_DIRECTORY}/${_video_name_out}"
         ;;
 
       *)
